@@ -10,7 +10,7 @@ export async function isFreighterInstalled(): Promise<boolean> {
     if (typeof res === 'boolean') {
       return res;
     }
-    return !!res?.isConnected;
+    return !!(res as any)?.isConnected;
   } catch (err) {
     console.error('Failed to check if Freighter is installed:', err);
     return false;
