@@ -8,6 +8,7 @@ import { useInvoices } from '@/hooks/useInvoices';
 import { usePool } from '@/hooks/usePool';
 import { useWalletStore } from '@/store/wallet';
 import { Invoice } from '@/types';
+import { formatAmount } from '@/lib/assets';
 
 export default function Marketplace() {
   const { connected, role } = useWalletStore();
@@ -24,14 +25,6 @@ export default function Marketplace() {
   });
   
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-
-  const formatUSDC = (amount: bigint | undefined) => {
-    if (amount === undefined) return '0.00 USDC';
-    return (Number(amount) / 10_000_000).toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }) + ' USDC';
-  };
 
   // Filter and Sort Invoices
   const filteredAndSortedInvoices = useMemo(() => {
@@ -87,7 +80,7 @@ export default function Marketplace() {
             <div className="bg-[#0d131a] border border-border rounded-lg px-4 py-2 text-right font-mono">
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider block">Pool Liquidity Available</span>
               <span className="text-sm font-bold text-primary block mt-0.5">
-                {isStatsLoading ? 'Syncing...' : formatUSDC(stats?.availableLiquidity)}
+                {isStatsLoading ? 'Syncing...' : formatAmount(stats?.availableLiquidity)}
               </span>
             </div>
           </div>
@@ -117,7 +110,7 @@ export default function Marketplace() {
           </div>
 
           <div className="space-y-1">
-            <span className="text-[10px] text-slate-500 font-bold uppercase">Min Value (USDC)</span>
+            <span className="text-[10px] text-slate-500 font-bold uppercase">Min Value</span>
             <input
               type="number"
               placeholder="e.g. 5000"
@@ -128,7 +121,7 @@ export default function Marketplace() {
           </div>
 
           <div className="space-y-1">
-            <span className="text-[10px] text-slate-500 font-bold uppercase">Max Value (USDC)</span>
+            <span className="text-[10px] text-slate-500 font-bold uppercase">Max Value</span>
             <input
               type="number"
               placeholder="e.g. 50000"
@@ -212,11 +205,11 @@ export default function Marketplace() {
                     <span className="text-primary font-bold block uppercase text-[10px] tracking-wider">POOL FINANCING PREVIEW</span>
                     <div className="flex justify-between">
                       <span>Face Value:</span>
-                      <span>{formatUSDC(selectedInvoice.faceValue)}</span>
+                      <span>{formatAmount(selectedInvoice.faceValue, selectedInvoice.asset)}</span>
                     </div>
                     <div className="flex justify-between text-primary font-bold">
                       <span>Funded Cost (at {selectedInvoice.discountBps} bps):</span>
-                      <span>{formatUSDC(calculateFundingValue(selectedInvoice.faceValue, selectedInvoice.discountBps))}</span>
+                      <span>{formatAmount(calculateFundingValue(selectedInvoice.faceValue, selectedInvoice.discountBps), selectedInvoice.asset)}</span>
                     </div>
                     <div className="text-[10px] text-slate-500 pt-1 leading-normal border-t border-border/20 mt-1">
                       Funding this invoice deploys USDC from the pool contract into escrow. LPs earn the discount difference upon repayment.

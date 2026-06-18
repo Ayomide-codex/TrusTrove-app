@@ -4,6 +4,9 @@ import React, { useState } from 'react';
 import { useInvoices } from '@/hooks/useInvoices';
 import { Button } from '@/components/ui/button';
 import { ShieldAlert, PlusCircle } from 'lucide-react';
+import type { AssetType } from '@/types';
+import { ASSET_OPTIONS } from '@/lib/assets';
+import { AmountInput } from '@/components/shared/AmountInput';
 
 interface InvoiceFormProps {
   onSuccess?: () => void;
@@ -13,6 +16,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
   const { createInvoice, isCreating, listInvoice } = useInvoices();
   const [buyer, setBuyer] = useState('');
   const [faceValue, setFaceValue] = useState('');
+  const [asset, setAsset] = useState<AssetType>('USDC');
   const [dueDays, setDueDays] = useState('60');
   const [discountBps, setDiscountBps] = useState(200); // default 2% (200 bps)
   const [immediateList, setImmediateList] = useState(true);
@@ -61,6 +65,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
         buyer,
         faceValue: faceValueStroops,
         dueDate: dueDateTimestamp,
+        asset,
       });
 
       const invoiceId = res.invoice_id;
@@ -114,26 +119,32 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
             />
           </div>
 
-          {/* Value and Days */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="block text-[10px] font-bold font-mono text-slate-500 uppercase tracking-wider">
-                Face Value (USDC)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                placeholder="50,000.00"
-                className="w-full bg-[#080c10] border border-border rounded px-3 py-2 text-white text-xs font-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+          {/* Value, Asset, and Days */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-2 space-y-1">
+              <AmountInput
                 value={faceValue}
-                onChange={(e) => setFaceValue(e.target.value)}
+                onChange={setFaceValue}
+                asset={asset}
+                label="Face Value"
+                placeholder="50,000.00"
                 required
               />
-              {parsedValue > 0 && (
-                <span className="text-[10px] font-mono text-slate-400 block mt-1">
-                  = {parsedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })} USDC
-                </span>
-              )}
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-[10px] font-bold font-mono text-slate-500 uppercase tracking-wider">
+                Asset
+              </label>
+              <select
+                value={asset}
+                onChange={(e) => setAsset(e.target.value as AssetType)}
+                className="w-full bg-[#080c10] border border-border rounded px-3 py-2 text-white text-xs font-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+              >
+                {ASSET_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-1">
@@ -209,22 +220,22 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
           <div className="bg-[#080c10] border border-border p-4 rounded-lg space-y-2">
             <div className="flex justify-between">
               <span className="text-slate-500">Invoice Face Value:</span>
-              <span className="text-white font-bold">{parsedValue.toLocaleString()} USDC</span>
+              <span className="text-white font-bold">{parsedValue.toLocaleString()} {asset}</span>
             </div>
             
             {immediateList ? (
               <>
                 <div className="flex justify-between text-rose-400">
                   <span>Discount ({(discountBps / 100).toFixed(2)}%):</span>
-                  <span>-{discountPaid.toLocaleString()} USDC</span>
+                  <span>-{discountPaid.toLocaleString()} {asset}</span>
                 </div>
                 <div className="border-t border-border/40 my-2 pt-2 flex justify-between text-emerald-400 font-bold">
                   <span>Net Payout Today:</span>
-                  <span>{payoutAmount.toLocaleString()} USDC</span>
+                  <span>{payoutAmount.toLocaleString()} {asset}</span>
                 </div>
                 <div className="flex justify-between text-slate-400 text-[10px]">
                   <span>Buyer Repayment (due in {dueDays}d):</span>
-                  <span>{parsedValue.toLocaleString()} USDC</span>
+                  <span>{parsedValue.toLocaleString()} {asset}</span>
                 </div>
               </>
             ) : (

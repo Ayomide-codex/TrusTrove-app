@@ -7,8 +7,11 @@ import { useWalletStore } from '@/store/wallet';
 import { WalletConnect } from '@/components/shared/WalletConnect';
 import { Button } from '@/components/ui/button';
 import { TransactionPending } from '@/components/shared/TransactionPending';
+import { AmountInput } from '@/components/shared/AmountInput';
 import { Coins, Unlock, Landmark, Wallet, ShieldAlert, Activity } from 'lucide-react';
 import { motion } from 'framer-motion';
+import type { AssetType } from '@/types';
+import { ASSET_OPTIONS, formatAmount } from '@/lib/assets';
 
 export default function LPDashboard() {
   const { connected } = useWalletStore();
@@ -26,6 +29,7 @@ export default function LPDashboard() {
   } = usePool();
 
   const [depositAmount, setDepositAmount] = useState('');
+  const [depositAsset, setDepositAsset] = useState<AssetType>('USDC');
   const [withdrawShares, setWithdrawShares] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
   
@@ -33,14 +37,6 @@ export default function LPDashboard() {
   const [showPending, setShowPending] = useState(false);
   const [pendingHash, setPendingHash] = useState<string | null>(null);
   const [pendingText, setPendingText] = useState('Waiting for confirmation...');
-
-  const formatUSDC = (amount: bigint | undefined) => {
-    if (amount === undefined) return '0.00 USDC';
-    return (Number(amount) / 10_000_000).toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }) + ' USDC';
-  };
 
   const handleDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,12 +47,14 @@ export default function LPDashboard() {
       return;
     }
     
-    setPendingText('Depositing USDC into pool...');
+    setPendingText(`Depositing ${depositAsset} into pool...`);
     setPendingHash(null);
     setShowPending(true);
 
     try {
       const amountStroops = BigInt(Math.floor(amountNum * 10_000_000));
+      // TODO(#19): Pass depositAsset to contract when XLM support is merged
+      // Currently PoolClient.deposit() only accepts USDC amount
       const res = await deposit({ amount: amountStroops });
       if (typeof res === 'string') {
         setPendingHash(res);
@@ -77,7 +75,7 @@ export default function LPDashboard() {
       return;
     }
 
-    setPendingText('Redeeming LP shares for USDC...');
+    setPendingText('Redeeming LP shares...');
     setPendingHash(null);
     setShowPending(true);
 
@@ -186,19 +184,19 @@ export default function LPDashboard() {
                 <div>
                   <span className="text-[10px] text-slate-500 font-bold uppercase block">Total Deposits</span>
                   <span className="text-md font-bold text-white block mt-1">
-                    {isStatsLoading ? 'Syncing...' : formatUSDC(stats?.totalDeposits)}
+                    {isStatsLoading ? 'Syncing...' : formatAmount(stats?.totalDeposits)}
                   </span>
                 </div>
                 <div>
                   <span className="text-[10px] text-slate-500 font-bold uppercase block">Available Liquidity</span>
                   <span className="text-md font-bold text-primary block mt-1">
-                    {isStatsLoading ? 'Syncing...' : formatUSDC(stats?.availableLiquidity)}
+                    {isStatsLoading ? 'Syncing...' : formatAmount(stats?.availableLiquidity)}
                   </span>
                 </div>
                 <div>
                   <span className="text-[10px] text-slate-500 font-bold uppercase block">Yield Distributed</span>
                   <span className="text-md font-bold text-emerald-400 block mt-1">
-                    {isStatsLoading ? 'Syncing...' : formatUSDC(stats?.totalYieldDistributed)}
+                    {isStatsLoading ? 'Syncing...' : formatAmount(stats?.totalYieldDistributed)}
                   </span>
                 </div>
                 <div>
@@ -273,7 +271,7 @@ export default function LPDashboard() {
                 <div>
                   <span className="text-[10px] text-slate-500 font-bold uppercase block">Current USDC Value</span>
                   <span className="text-xl font-bold text-white block mt-1">
-                    {isPositionLoading ? 'Syncing...' : formatUSDC(position?.usdcValue)}
+                    {isPositionLoading ? 'Syncing...' : formatAmount(position?.usdcValue)}
                   </span>
                 </div>
 
@@ -287,7 +285,7 @@ export default function LPDashboard() {
                   <div>
                     <span className="text-[10px] text-slate-500 font-bold uppercase block">Yield Earned</span>
                     <span className="text-sm font-bold text-emerald-400 block mt-0.5">
-                      {isPositionLoading ? '...' : formatUSDC(position?.yieldEarned)}
+                      {isPositionLoading ? '...' : formatAmount(position?.yieldEarned)}
                     </span>
                   </div>
                 </div>
@@ -300,26 +298,39 @@ export default function LPDashboard() {
               <div className="bg-[#0d131a] border border-border rounded-lg p-5 space-y-4">
                 <h4 className="text-xs font-bold font-mono text-white uppercase tracking-wider flex items-center gap-1.5">
                   <Coins className="w-4 h-4 text-emerald-400" />
-                  Deposit USDC
+                  Deposit {depositAsset}
                 </h4>
                 <form onSubmit={handleDeposit} className="space-y-3">
                   <div>
                     <label className="block text-[10px] font-bold font-mono text-slate-500 uppercase mb-1">
                       Supply Amount
                     </label>
-                    <input
-                      type="number"
-                      step="1"
-                      placeholder="10,000"
-                      className="w-full bg-[#080c10] border border-border rounded px-3 py-1.5 text-white font-mono text-xs focus:outline-none focus:border-primary"
-                      value={depositAmount}
-                      onChange={(e) => setDepositAmount(e.target.value)}
-                      disabled={isDepositing}
-                      required
-                    />
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <AmountInput
+                          value={depositAmount}
+                          onChange={setDepositAmount}
+                          asset={depositAsset}
+                          placeholder="10,000"
+                          disabled={isDepositing}
+                          required
+                        />
+                      </div>
+                      <div className="w-24">
+                        <select
+                          value={depositAsset}
+                          onChange={(e) => setDepositAsset(e.target.value as AssetType)}
+                          className="w-full bg-[#080c10] border border-border rounded px-3 py-2 text-white text-xs font-mono focus:outline-none focus:border-primary h-[38px]"
+                        >
+                          {ASSET_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
                     {parsedDep > 0 && (
                       <span className="text-[10px] font-mono text-slate-400 block mt-1.5 leading-tight">
-                        Depositing {parsedDep.toLocaleString()} USDC → receive ~{depSharesPreview.toLocaleString()} LP Shares
+                        Depositing {parsedDep.toLocaleString()} {depositAsset} → receive ~{depSharesPreview.toLocaleString()} LP Shares
                       </span>
                     )}
                   </div>
@@ -328,7 +339,7 @@ export default function LPDashboard() {
                     disabled={isDepositing}
                     className="w-full bg-primary hover:bg-primary-hover text-black font-bold uppercase text-xs tracking-wider rounded py-2 shadow-[0_0_15px_rgba(0,212,170,0.1)]"
                   >
-                    {isDepositing ? 'DEPOSITING...' : 'DEPOSIT USDC'}
+                    {isDepositing ? 'DEPOSITING...' : `DEPOSIT ${depositAsset}`}
                   </Button>
                 </form>
               </div>

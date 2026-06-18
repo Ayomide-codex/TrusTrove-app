@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useWalletStore } from '@/store/wallet';
 import { motion } from 'framer-motion';
 import { Calendar, ShieldAlert, Copy, Check, Truck, Landmark, Wallet, CheckSquare, Clock } from 'lucide-react';
+import { formatAmount } from '@/lib/assets';
 
 interface InvoiceCardProps {
   invoice: Invoice;
@@ -25,13 +26,6 @@ export function InvoiceCard({ invoice, role, onSelect, isSelected }: InvoiceCard
   const [copiedBuyer, setCopiedBuyer] = useState(false);
   const [discountBpsInput, setDiscountBpsInput] = useState('200'); // default 2%
   const [showListForm, setShowListForm] = useState(false);
-
-  const formatUSDC = (amount: bigint) => {
-    return (Number(amount) / 10_000_000).toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }) + ' USDC';
-  };
 
   const truncateAddr = (addr: string) => {
     if (!addr) return '';
@@ -120,7 +114,7 @@ export function InvoiceCard({ invoice, role, onSelect, isSelected }: InvoiceCard
         <div>
           <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider block">Face Value</span>
           <span className="text-lg font-bold font-mono text-white">
-            {formatUSDC(invoice.faceValue)}
+            {formatAmount(invoice.faceValue, invoice.asset)}
           </span>
         </div>
         <div>
@@ -178,7 +172,7 @@ export function InvoiceCard({ invoice, role, onSelect, isSelected }: InvoiceCard
         <div className="bg-[#080c10] rounded border border-border/30 p-2.5 mb-4 text-[10px] font-mono space-y-1">
           <div className="flex justify-between">
             <span className="text-slate-500">Funded liquidity:</span>
-            <span className="font-bold text-sky-400">{formatUSDC(invoice.fundedAmount)}</span>
+            <span className="font-bold text-sky-400">{formatAmount(invoice.fundedAmount, invoice.asset)}</span>
           </div>
           {invoice.fundedAt && (
             <div className="flex justify-between">

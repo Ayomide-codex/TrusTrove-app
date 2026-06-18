@@ -51,8 +51,8 @@ export function useInvoices(filters?: { status?: string; issuer?: string }) {
   });
 
   const createInvoiceMutation = useMutation({
-    mutationFn: async ({ buyer, faceValue, dueDate }: { buyer: string; faceValue: string; dueDate: number }) => {
-      return createInvoice(buyer, faceValue, dueDate);
+    mutationFn: async ({ buyer, faceValue, dueDate, asset }: { buyer: string; faceValue: string; dueDate: number; asset?: string }) => {
+      return createInvoice(buyer, faceValue, dueDate, asset as any);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });

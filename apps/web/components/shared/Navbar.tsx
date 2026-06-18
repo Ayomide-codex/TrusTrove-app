@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { WalletConnect } from './WalletConnect';
 import { useWalletStore } from '@/store/wallet';
-import { Shield, Terminal } from 'lucide-react';
+import { useBalances } from '@/hooks/useBalances';
+import { Wallet, Shield, Terminal } from 'lucide-react';
 
 export function Navbar() {
   const pathname = usePathname();
   const { role, setRole, connected } = useWalletStore();
+  const { balances, loading: balancesLoading } = useBalances();
 
   const navItems = [
     { name: 'SME Dashboard', href: '/dashboard' },
@@ -53,19 +55,50 @@ export function Navbar() {
 
           <div className="flex items-center gap-4">
             {connected && (
-              <div className="flex items-center gap-2 bg-neutral-900 border border-border rounded-lg px-2.5 py-1">
-                <Shield className="w-3.5 h-3.5 text-primary" />
-                <span className="text-[10px] font-bold text-slate-500 font-mono uppercase tracking-wider hidden sm:inline">Role:</span>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as any)}
-                  className="bg-transparent text-xs text-white border-none focus:ring-0 focus:outline-none font-bold font-mono cursor-pointer pr-5 py-0"
-                >
-                  <option value="issuer" className="bg-[#080c10] text-slate-200">SME (Issuer)</option>
-                  <option value="buyer" className="bg-[#080c10] text-slate-200">Buyer</option>
-                  <option value="lp" className="bg-[#080c10] text-slate-200">LP (Funder)</option>
-                </select>
-              </div>
+              <>
+                {/* Balances */}
+                <div className="hidden md:flex items-center gap-3 bg-neutral-900 border border-border rounded-lg px-3 py-1">
+                  <div className="flex items-center gap-1.5">
+                    <Wallet className="w-3 h-3 text-sky-400" />
+                    {balancesLoading ? (
+                      <span className="text-[10px] text-slate-500 font-mono animate-pulse">...</span>
+                    ) : (
+                      <span className="text-[10px] font-mono text-slate-300 font-bold">
+                        {balances.usdc !== null
+                          ? `${parseFloat(balances.usdc).toLocaleString(undefined, { maximumFractionDigits: 2 })} USDC`
+                          : '— USDC'}
+                      </span>
+                    )}
+                  </div>
+                  <div className="w-px h-3 bg-border" />
+                  <div className="flex items-center gap-1.5">
+                    <Wallet className="w-3 h-3 text-amber-400" />
+                    {balancesLoading ? (
+                      <span className="text-[10px] text-slate-500 font-mono animate-pulse">...</span>
+                    ) : (
+                      <span className="text-[10px] font-mono text-slate-300 font-bold">
+                        {balances.xlm !== null
+                          ? `${parseFloat(balances.xlm).toLocaleString(undefined, { maximumFractionDigits: 2 })} XLM`
+                          : '0 XLM'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 bg-neutral-900 border border-border rounded-lg px-2.5 py-1">
+                  <Shield className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-[10px] font-bold text-slate-500 font-mono uppercase tracking-wider hidden sm:inline">Role:</span>
+                  <select
+                    value={role}
+                    onChange={(e) => setRole(e.target.value as any)}
+                    className="bg-transparent text-xs text-white border-none focus:ring-0 focus:outline-none font-bold font-mono cursor-pointer pr-5 py-0"
+                  >
+                    <option value="issuer" className="bg-[#080c10] text-slate-200">SME (Issuer)</option>
+                    <option value="buyer" className="bg-[#080c10] text-slate-200">Buyer</option>
+                    <option value="lp" className="bg-[#080c10] text-slate-200">LP (Funder)</option>
+                  </select>
+                </div>
+              </>
             )}
 
             <WalletConnect />

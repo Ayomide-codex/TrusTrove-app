@@ -7,6 +7,8 @@ export type InvoiceStatus =
   | 'Repaid'
   | 'Defaulted';
 
+export type AssetType = 'USDC' | 'XLM';
+
 export interface Profile {
   address: string;
   role: 'issuer' | 'buyer';
@@ -18,7 +20,8 @@ export interface Invoice {
   id: string; // hex string of BytesN<32>
   issuer: string;
   buyer: string;
-  faceValue: bigint; // u128 amount in stroops (1 USDC = 10_000_000)
+  faceValue: bigint; // u128 amount in stroops (10^7 = 1 unit)
+  asset: AssetType; // Denominated asset (defaults to 'USDC' for backward compat)
   discountBps: number; // u32 basis points
   fundedAmount: bigint; // u128
   dueDate: number; // Unix timestamp

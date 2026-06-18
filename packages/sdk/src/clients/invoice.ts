@@ -1,6 +1,6 @@
 import { Address, nativeToScVal, scValToNative, xdr } from '@stellar/stellar-sdk';
 import { BaseContractClient } from '../base.js';
-import { Invoice, InvoiceStatus } from '../types/index.js';
+import { AssetType, Invoice, InvoiceStatus } from '../types/index.js';
 
 function parseBytes(val: unknown): string {
   if (!val) return '';
@@ -20,6 +20,7 @@ function parseInvoice(native: unknown): Invoice {
   let issuer = '';
   let buyer = '';
   let faceValue = 0n;
+  let asset: AssetType = 'USDC';
   let discountBps = 0;
   let fundedAmount = 0n;
   let dueDate = 0;
@@ -36,6 +37,7 @@ function parseInvoice(native: unknown): Invoice {
     issuer = native.get('issuer')?.toString() || '';
     buyer = native.get('buyer')?.toString() || '';
     faceValue = getBigInt(native.get('face_value'));
+    asset = (native.get('asset')?.toString() || 'USDC') as AssetType;
     discountBps = getNumber(native.get('discount_bps'));
     fundedAmount = getBigInt(native.get('funded_amount'));
     dueDate = getNumber(native.get('due_date'));
@@ -52,6 +54,7 @@ function parseInvoice(native: unknown): Invoice {
     issuer = obj.issuer?.toString() || '';
     buyer = obj.buyer?.toString() || '';
     faceValue = getBigInt(obj.face_value);
+    asset = (obj.asset?.toString() || 'USDC') as AssetType;
     discountBps = getNumber(obj.discount_bps);
     fundedAmount = getBigInt(obj.funded_amount);
     dueDate = getNumber(obj.due_date);
@@ -69,6 +72,7 @@ function parseInvoice(native: unknown): Invoice {
     issuer,
     buyer,
     faceValue,
+    asset,
     discountBps,
     fundedAmount,
     dueDate,

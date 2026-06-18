@@ -13,6 +13,7 @@ import { InvoiceCardSkeleton } from '@/components/shared/SkeletonLoader';
 import { Layers, Plus } from 'lucide-react';
 import { Invoice } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatAmount } from '@/lib/assets';
 
 export default function SMEDashboard() {
   const { address, connected, role } = useWalletStore();
@@ -25,13 +26,6 @@ export default function SMEDashboard() {
   const totalInvoicesCreated = invoices.length;
   const totalListed = invoices.filter(i => i.status === 'Listed').length;
   const totalFundedActive = invoices.filter(i => i.status === 'Funded' || i.status === 'Active' || i.status === 'Confirmed').length;
-
-  const formatUSDC = (amount: bigint) => {
-    return (Number(amount) / 10_000_000).toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }) + ' USDC';
-  };
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -97,11 +91,11 @@ export default function SMEDashboard() {
             <span className="text-[9px] text-slate-600">Awaiting financing</span>
           </div>
 
-          <div className="bg-card border border-border rounded-lg p-4 font-mono">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Funded & Active</span>
-            <span className="text-lg font-bold text-sky-400 block mt-1">{totalFundedActive}</span>
-            <span className="text-[9px] text-slate-600">USDC deployed on-chain</span>
-          </div>
+                <div className="bg-card border border-border rounded-lg p-4 font-mono">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Funded & Active</span>
+                  <span className="text-lg font-bold text-sky-400 block mt-1">{totalFundedActive}</span>
+                  <span className="text-[9px] text-slate-600">Liquidity deployed on-chain</span>
+                </div>
 
           <div className="bg-card border border-border rounded-lg p-4 font-mono">
             <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Total Repaid</span>
@@ -111,11 +105,11 @@ export default function SMEDashboard() {
             <span className="text-[9px] text-slate-600">Settle invoices</span>
           </div>
 
-          <div className="bg-card border border-border rounded-lg p-4 col-span-2 lg:col-span-1 font-mono">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Total Financed</span>
-            <span className="text-lg font-bold text-white block mt-1 truncate">{formatUSDC(totalFunded)}</span>
-            <span className="text-[9px] text-slate-600">Liquidity captured</span>
-          </div>
+            <div className="bg-card border border-border rounded-lg p-4 col-span-2 lg:col-span-1 font-mono">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Total Financed</span>
+              <span className="text-lg font-bold text-white block mt-1 truncate">{formatAmount(totalFunded)}</span>
+              <span className="text-[9px] text-slate-600">Liquidity captured</span>
+            </div>
         </div>
 
         {/* Dashboard Grid */}

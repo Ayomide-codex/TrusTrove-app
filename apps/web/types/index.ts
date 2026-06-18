@@ -1,4 +1,4 @@
-export type { Invoice, InvoiceStatus, PoolStats, LPPosition, Profile } from '@trusttrove/sdk';
+export type { Invoice, InvoiceStatus, PoolStats, LPPosition, Profile, AssetType } from '@trusttrove/sdk';
 
 export interface TxHistoryItem {
   id: string;

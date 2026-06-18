@@ -1,5 +1,5 @@
 import { useWalletStore } from '@/store/wallet';
-import { Invoice, PoolStats, LPPosition } from '@/types';
+import { AssetType, Invoice, PoolStats, LPPosition } from '@/types';
 
 const getApiUrl = () => {
   return process.env.NEXT_PUBLIC_INDEXER_API_URL || 'http://localhost:8080';
@@ -35,6 +35,7 @@ function parseRawInvoice(raw: any): Invoice {
     issuer: raw.issuer,
     buyer: raw.buyer,
     faceValue: BigInt(raw.face_value || 0),
+    asset: (raw.asset || 'USDC') as AssetType,
     discountBps: Number(raw.discount_bps || 0),
     fundedAmount: BigInt(raw.funded_amount || 0),
     dueDate: Number(raw.due_date || 0),
@@ -82,7 +83,8 @@ export async function verifyChallenge(transaction: string): Promise<{ token: str
 export async function createInvoice(
   buyer: string,
   faceValue: string,
-  dueDate: number
+  dueDate: number,
+  asset: AssetType = 'USDC'
 ): Promise<{ invoice_id: string; transaction_hash: string; status: string }> {
   return apiFetch<{ invoice_id: string; transaction_hash: string; status: string }>('/invoices', {
     method: 'POST',
@@ -90,6 +92,7 @@ export async function createInvoice(
       buyer,
       face_value: faceValue,
       due_date: dueDate,
+      asset,
     }),
   });
 }

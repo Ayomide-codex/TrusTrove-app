@@ -9,7 +9,7 @@ import { InvoiceStatus } from '@/components/invoice/InvoiceStatus';
 import { StatusTimeline } from '@/components/invoice/StatusTimeline';
 import { Button } from '@/components/ui/button';
 import { TransactionPending } from '@/components/shared/TransactionPending';
-import { 
+import {
   Calendar, 
   ShieldAlert, 
   Copy, 
@@ -20,6 +20,7 @@ import {
   Activity, 
   TrendingUp
 } from 'lucide-react';
+import { formatAmount } from '@/lib/assets';
 
 export default function InvoiceDetailPage() {
   const params = useParams();
@@ -42,14 +43,6 @@ export default function InvoiceDetailPage() {
   const [showPending, setShowPending] = useState(false);
   const [pendingHash, setPendingHash] = useState<string | null>(null);
   const [pendingText, setPendingText] = useState('Waiting for confirmation...');
-
-  const formatUSDC = (amount: bigint | undefined) => {
-    if (amount === undefined) return '0.00 USDC';
-    return (Number(amount) / 10_000_000).toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }) + ' USDC';
-  };
 
   const formatAddress = (addr: string) => {
     if (!addr) return '';
@@ -171,7 +164,7 @@ export default function InvoiceDetailPage() {
 
           <div className="bg-[#0d131a] border border-border rounded px-4 py-2 font-mono text-right">
             <span className="text-[10px] text-slate-500 font-bold uppercase block">Face Value Obligations</span>
-            <span className="text-lg font-bold text-white block mt-0.5">{formatUSDC(invoice.faceValue)}</span>
+            <span className="text-lg font-bold text-white block mt-0.5">{formatAmount(invoice.faceValue)}</span>
           </div>
         </div>
 
@@ -236,11 +229,11 @@ export default function InvoiceDetailPage() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
                 <div className="bg-[#080c10] border border-border/40 p-3 rounded">
-                  <span className="text-[10px] text-slate-500 font-bold uppercase block">USDC Locked in Escrow</span>
+                  <span className="text-[10px] text-slate-500 font-bold uppercase block">{invoice.asset} Locked in Escrow</span>
                   <span className="text-md font-bold text-sky-400 block mt-1">
                     {invoice.status === 'Funded' || invoice.status === 'Active' || invoice.status === 'Confirmed' 
-                      ? formatUSDC(invoice.faceValue) 
-                      : '0.00 USDC'}
+                      ? formatAmount(invoice.faceValue, invoice.asset) 
+                      : `0.00 ${invoice.asset}`}
                   </span>
                 </div>
                 <div className="bg-[#080c10] border border-border/40 p-3 rounded">
@@ -296,7 +289,7 @@ export default function InvoiceDetailPage() {
                 <div className="flex justify-between">
                   <span className="text-slate-500">Net Discount Fee:</span>
                   <span className="text-slate-300 font-bold">
-                    {formatUSDC(invoice.faceValue - invoice.fundedAmount)}
+                    {formatAmount(invoice.faceValue - invoice.fundedAmount)}
                   </span>
                 </div>
               </div>
@@ -344,7 +337,7 @@ export default function InvoiceDetailPage() {
                       onClick={() => handleAction(() => repayInvoice({ invoiceId: invoice.id }), 'Submitting USDC repayment...', 'Failed to repay invoice')}
                       disabled={submitting}
                     >
-                      REPAY {formatUSDC(invoice.faceValue)}
+                      REPAY {formatAmount(invoice.faceValue)}
                     </Button>
                   )}
 

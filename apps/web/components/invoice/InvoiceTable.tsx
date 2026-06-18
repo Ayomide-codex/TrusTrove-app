@@ -3,6 +3,7 @@
 import React from 'react';
 import { Invoice } from '@/types';
 import { InvoiceStatus } from './InvoiceStatus';
+import { formatAmount } from '@/lib/assets';
 
 interface InvoiceTableProps {
   invoices: Invoice[];
@@ -11,12 +12,6 @@ interface InvoiceTableProps {
 }
 
 export function InvoiceTable({ invoices, onSelectInvoice, activeId }: InvoiceTableProps) {
-  const formatUSDC = (amount: bigint) => {
-    return (Number(amount) / 10_000_000).toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }) + ' USDC';
-  };
 
   const truncateAddr = (addr: string) => {
     if (!addr) return '';
@@ -66,7 +61,7 @@ export function InvoiceTable({ invoices, onSelectInvoice, activeId }: InvoiceTab
                       {truncateAddr(invoice.buyer)}
                     </td>
                     <td className="px-5 py-3.5 text-white font-bold">
-                      {formatUSDC(invoice.faceValue)}
+                      {formatAmount(invoice.faceValue, invoice.asset)}
                     </td>
                     <td className="px-5 py-3.5 text-slate-300">
                       {invoice.discountBps > 0
