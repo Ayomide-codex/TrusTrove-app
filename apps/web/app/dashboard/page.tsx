@@ -10,7 +10,7 @@ import { useInvoices } from '@/hooks/useInvoices';
 import { useWalletStore } from '@/store/wallet';
 import { useProfile } from '@/hooks/useProfile';
 import { WalletConnect } from '@/components/shared/WalletConnect';
-import { InvoiceCardSkeleton } from '@/components/shared/SkeletonLoader';
+import { InvoiceTableSkeleton, ActivityTimelineSkeleton } from '@/components/shared/SkeletonLoader';
 import { Layers, Plus, ShieldAlert } from 'lucide-react';
 import { Invoice } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -141,17 +141,10 @@ export default function SMEDashboard() {
           
           {/* Main Invoices Section (Left / Center) */}
           <div className="lg:col-span-8 space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-sm font-bold font-mono tracking-wider uppercase text-white">Issued Invoices</h2>
-              {isLoading && <span className="text-[10px] font-mono text-primary animate-pulse uppercase">Syncing...</span>}
-            </div>
+            <h2 className="text-sm font-bold font-mono tracking-wider uppercase text-white">Issued Invoices</h2>
 
             {isLoading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <InvoiceCardSkeleton key={i} />
-                ))}
-              </div>
+              <InvoiceTableSkeleton />
             ) : (
               <InvoiceTable 
                 invoices={invoices} 
@@ -161,6 +154,9 @@ export default function SMEDashboard() {
             )}
 
             {/* Recent activity timeline */}
+            {isLoading ? (
+              <ActivityTimelineSkeleton />
+            ) : (
             <div className="bg-card border border-border rounded-lg p-5 space-y-4">
               <h3 className="text-xs font-bold font-mono text-white uppercase tracking-wider border-b border-border/40 pb-2">
                 On-Chain Activity Logs
@@ -177,6 +173,7 @@ export default function SMEDashboard() {
                 ))}
               </div>
             </div>
+            )}
           </div>
 
           {/* Side Management Panel (Right) */}
@@ -223,18 +220,26 @@ export default function SMEDashboard() {
 
       {/* Create Invoice Dialog Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#080c10]/95 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg relative">
-            <button
-              onClick={() => setShowCreateModal(false)}
-              className="absolute -top-10 right-0 text-slate-500 hover:text-white font-bold font-mono text-xs uppercase"
-            >
-              [Close Esc]
-            </button>
-            <InvoiceForm onSuccess={() => {
-              setShowCreateModal(false);
-              setSelectedInvoice(null);
-            }} />
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-[#080c10]/95 backdrop-blur-sm p-0 md:p-4">
+          <div
+            className="w-full max-w-lg relative bg-card border md:border-border rounded-t-2xl md:rounded-lg max-h-[92vh] md:max-h-[85vh] overflow-hidden flex flex-col shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 pt-4 pb-2 border-b border-border/40 shrink-0">
+              <span className="text-[10px] font-bold font-mono text-slate-500 uppercase tracking-wider">New Invoice</span>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="text-slate-500 hover:text-white font-bold font-mono text-xs uppercase px-2 py-1 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              >
+                [Close Esc]
+              </button>
+            </div>
+            <div className="overflow-y-auto overscroll-contain p-5 pt-3">
+              <InvoiceForm onSuccess={() => {
+                setShowCreateModal(false);
+                setSelectedInvoice(null);
+              }} />
+            </div>
           </div>
         </div>
       )}
