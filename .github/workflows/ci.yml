@@ -34,6 +34,9 @@ jobs:
     - name: Lint Web Application
       run: pnpm --filter web lint
 
+    - name: Check Formatting
+      run: npx prettier --check .
+
   verify-go-indexer:
     name: Verify Go Indexer & API
     runs-on: ubuntu-latest
@@ -61,3 +64,12 @@ jobs:
       run: |
         cd indexer
         go vet ./...
+
+    - name: Check Go Formatting
+      run: |
+        cd indexer
+        if [ -n "$(gofmt -l .)" ]; then
+          echo "The following files are not formatted:"
+          gofmt -l .
+          exit 1
+        fi
