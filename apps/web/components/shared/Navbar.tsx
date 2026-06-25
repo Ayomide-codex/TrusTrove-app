@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { WalletConnect } from './WalletConnect';
-import { SkeletonShimmer } from './SkeletonLoader';
-import { useWalletStore } from '@/store/wallet';
-import { useBalances } from '@/hooks/useBalances';
-import { Wallet, Shield, Terminal, ExternalLink } from 'lucide-react';
+import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { WalletConnect } from "./WalletConnect";
+import { SkeletonShimmer } from "./SkeletonLoader";
+import { useWalletStore } from "@/store/wallet";
+import { useBalances } from "@/hooks/useBalances";
+import { Wallet, Shield, Terminal, ExternalLink } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -15,9 +15,9 @@ export function Navbar() {
   const { balances, loading: balancesLoading } = useBalances();
 
   const navItems = [
-    { name: 'SME Dashboard', href: '/dashboard' },
-    { name: 'LP Portal', href: '/lp' },
-    { name: 'Marketplace', href: '/marketplace' },
+    { name: "SME Dashboard", href: "/dashboard" },
+    { name: "LP Portal", href: "/lp" },
+    { name: "Marketplace", href: "/marketplace" },
   ];
 
   return (
@@ -25,7 +25,10 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2 hover:opacity-95 transition-opacity">
+            <Link
+              href="/"
+              className="flex items-center gap-2 hover:opacity-95 transition-opacity"
+            >
               <div className="bg-primary/10 border border-primary/20 p-2 rounded-lg text-primary shadow-[0_0_10px_rgba(0,212,170,0.1)]">
                 <Terminal className="w-5 h-5" />
               </div>
@@ -43,8 +46,8 @@ export function Navbar() {
                     href={item.href}
                     className={`px-3.5 py-1.5 rounded-lg text-xs font-bold font-mono tracking-wider uppercase transition-all duration-200 border ${
                       isActive
-                        ? 'bg-primary/5 border-primary/20 text-primary'
-                        : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-900/50'
+                        ? "bg-primary/5 border-primary/20 text-primary"
+                        : "border-transparent text-slate-400 hover:text-white hover:bg-slate-900/50"
                     }`}
                   >
                     {item.name}
@@ -68,12 +71,19 @@ export function Navbar() {
                         <span className="text-[10px] font-mono text-slate-300 font-bold">
                           {balances.usdc !== null
                             ? `${parseFloat(balances.usdc).toLocaleString(undefined, { maximumFractionDigits: 2 })} USDC`
-                            : '— USDC'}
+                            : "— USDC"}
                         </span>
-                        {(balances.usdc === null || parseFloat(balances.usdc) === 0) && (
+                        {(balances.usdc === null ||
+                          parseFloat(balances.usdc) === 0) && (
                           <div className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-mono px-2 py-1 rounded-md shadow-lg z-50">
-                            <a href="https://demo.stellar.org" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:underline">
-                              Get testnet USDC <ExternalLink className="w-3 h-3" />
+                            <a
+                              href="https://demo.stellar.org"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 hover:underline"
+                            >
+                              Get testnet USDC{" "}
+                              <ExternalLink className="w-3 h-3" />
                             </a>
                           </div>
                         )}
@@ -89,7 +99,7 @@ export function Navbar() {
                       <span className="text-[10px] font-mono text-slate-300 font-bold">
                         {balances.xlm !== null
                           ? `${parseFloat(balances.xlm).toLocaleString(undefined, { maximumFractionDigits: 2 })} XLM`
-                          : '0 XLM'}
+                          : "0 XLM"}
                       </span>
                     )}
                   </div>
@@ -97,15 +107,29 @@ export function Navbar() {
 
                 <div className="flex items-center gap-2 bg-neutral-900 border border-border rounded-lg px-2.5 py-1">
                   <Shield className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-[10px] font-bold text-slate-500 font-mono uppercase tracking-wider hidden sm:inline">Role:</span>
+                  <span className="text-[10px] font-bold text-slate-500 font-mono uppercase tracking-wider hidden sm:inline">
+                    Role:
+                  </span>
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value as any)}
                     className="bg-transparent text-xs text-white border-none focus:ring-0 focus:outline-none font-bold font-mono cursor-pointer pr-5 py-0"
                   >
-                    <option value="issuer" className="bg-[#080c10] text-slate-200">SME (Issuer)</option>
-                    <option value="buyer" className="bg-[#080c10] text-slate-200">Buyer</option>
-                    <option value="lp" className="bg-[#080c10] text-slate-200">LP (Funder)</option>
+                    <option
+                      value="issuer"
+                      className="bg-[#080c10] text-slate-200"
+                    >
+                      SME (Issuer)
+                    </option>
+                    <option
+                      value="buyer"
+                      className="bg-[#080c10] text-slate-200"
+                    >
+                      Buyer
+                    </option>
+                    <option value="lp" className="bg-[#080c10] text-slate-200">
+                      LP (Funder)
+                    </option>
                   </select>
                 </div>
               </>

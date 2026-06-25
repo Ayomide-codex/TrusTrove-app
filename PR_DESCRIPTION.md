@@ -10,7 +10,7 @@ Adds an interactive LP yield calculator to the landing page right panel, replaci
   - Pool utilization slider (default 75%, range 10-100%)
   - Instant-updating outputs: estimated annual yield %, monthly earnings in USDC
   - Plain CSS comparison bar chart: TrusTrove vs Savings Account (5%) vs T-Bills (4.5%)
-  - Disclaimer always visible: *"Yield depends on pool utilization and invoice repayment rate. Smart contract risk exists."*
+  - Disclaimer always visible: _"Yield depends on pool utilization and invoice repayment rate. Smart contract risk exists."_
 - **Updated** `apps/web/app/page.tsx` — right panel now renders `<LpYieldCalculator />`; unused imports removed
 
 ## Acceptance Criteria

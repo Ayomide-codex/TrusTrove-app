@@ -1,4 +1,11 @@
-export type { Invoice, InvoiceStatus, PoolStats, LPPosition, Profile, AssetType } from '@trusttrove/sdk';
+export type {
+  Invoice,
+  InvoiceStatus,
+  PoolStats,
+  LPPosition,
+  Profile,
+  AssetType,
+} from "@trusttrove/sdk";
 
 export interface EventLog {
   id: number;
@@ -17,5 +24,5 @@ export interface TxHistoryItem {
   token?: string;
   timestamp: number;
   hash: string;
-  status: 'success' | 'failed';
+  status: "success" | "failed";
 }

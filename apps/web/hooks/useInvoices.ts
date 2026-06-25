@@ -1,10 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getInvoices, getInvoiceByID, createInvoice } from '@/lib/api';
-import { InvoiceClient, PoolClient } from '@trusttrove/sdk';
-import { useWalletStore } from '@/store/wallet';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getInvoices, getInvoiceByID, createInvoice } from "@/lib/api";
+import { InvoiceClient, PoolClient } from "@trusttrove/sdk";
+import { useWalletStore } from "@/store/wallet";
 
-const invoiceContractID = process.env.NEXT_PUBLIC_INVOICE_CONTRACT_ID || '';
-const poolContractID = process.env.NEXT_PUBLIC_POOL_CONTRACT_ID || '';
+const invoiceContractID = process.env.NEXT_PUBLIC_INVOICE_CONTRACT_ID || "";
+const poolContractID = process.env.NEXT_PUBLIC_POOL_CONTRACT_ID || "";
 
 /**
  * Custom hook for managing invoice lifecycle operations on the TrusTrove platform.
@@ -46,88 +46,104 @@ export function useInvoices(filters?: { status?: string; issuer?: string }) {
   const { address } = useWalletStore();
 
   const invoicesQuery = useQuery({
-    queryKey: ['invoices', filters],
+    queryKey: ["invoices", filters],
     queryFn: () => getInvoices(filters),
   });
 
   const createInvoiceMutation = useMutation({
-    mutationFn: async ({ buyer, faceValue, dueDate, asset }: { buyer: string; faceValue: string; dueDate: number; asset?: string }) => {
+    mutationFn: async ({
+      buyer,
+      faceValue,
+      dueDate,
+      asset,
+    }: {
+      buyer: string;
+      faceValue: string;
+      dueDate: number;
+      asset?: string;
+    }) => {
       return createInvoice(buyer, faceValue, dueDate, asset as any);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
     },
   });
 
   const listInvoiceMutation = useMutation({
-    mutationFn: async ({ invoiceId, discountBps }: { invoiceId: string; discountBps: number }) => {
-      if (!address) throw new Error('Wallet not connected');
+    mutationFn: async ({
+      invoiceId,
+      discountBps,
+    }: {
+      invoiceId: string;
+      discountBps: number;
+    }) => {
+      if (!address) throw new Error("Wallet not connected");
       const invoiceClient = new InvoiceClient(invoiceContractID);
       return invoiceClient.listForFinancing(invoiceId, discountBps, address);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
     },
   });
 
   const fundInvoiceMutation = useMutation({
     mutationFn: async ({ invoiceId }: { invoiceId: string }) => {
-      if (!address) throw new Error('Wallet not connected');
+      if (!address) throw new Error("Wallet not connected");
       const poolClient = new PoolClient(poolContractID);
       return poolClient.fundInvoice(invoiceId, address);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      queryClient.invalidateQueries({ queryKey: ['poolStats'] });
-      queryClient.invalidateQueries({ queryKey: ['lpPosition', address] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["poolStats"] });
+      queryClient.invalidateQueries({ queryKey: ["lpPosition", address] });
     },
   });
 
   const shipInvoiceMutation = useMutation({
     mutationFn: async ({ invoiceId }: { invoiceId: string }) => {
-      if (!address) throw new Error('Wallet not connected');
+      if (!address) throw new Error("Wallet not connected");
       const invoiceClient = new InvoiceClient(invoiceContractID);
       return invoiceClient.markShipped(invoiceId, address);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
     },
   });
 
   const confirmDeliveryMutation = useMutation({
     mutationFn: async ({ invoiceId }: { invoiceId: string }) => {
-      if (!address) throw new Error('Wallet not connected');
+      if (!address) throw new Error("Wallet not connected");
       const invoiceClient = new InvoiceClient(invoiceContractID);
       return invoiceClient.confirmDelivery(invoiceId, address, address);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
     },
   });
 
   const repayInvoiceMutation = useMutation({
     mutationFn: async ({ invoiceId }: { invoiceId: string }) => {
-      if (!address) throw new Error('Wallet not connected');
+      if (!address) throw new Error("Wallet not connected");
       const invoiceClient = new InvoiceClient(invoiceContractID);
       return invoiceClient.repay(invoiceId, address);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      queryClient.invalidateQueries({ queryKey: ['poolStats'] });
-      queryClient.invalidateQueries({ queryKey: ['lpPosition', address] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["poolStats"] });
+      queryClient.invalidateQueries({ queryKey: ["lpPosition", address] });
     },
   });
 
   const defaultInvoiceMutation = useMutation({
     mutationFn: async ({ invoiceId }: { invoiceId: string }) => {
-      if (!address) throw new Error('Wallet not connected');
+      if (!address) throw new Error("Wallet not connected");
       const invoiceClient = new InvoiceClient(invoiceContractID);
       return invoiceClient.triggerDefault(invoiceId, address);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      queryClient.invalidateQueries({ queryKey: ['poolStats'] });
-      queryClient.invalidateQueries({ queryKey: ['lpPosition', address] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["poolStats"] });
+      queryClient.invalidateQueries({ queryKey: ["lpPosition", address] });
     },
   });
 
@@ -184,7 +200,7 @@ export function useInvoices(filters?: { status?: string; issuer?: string }) {
  */
 export function useInvoice(id: string) {
   const invoiceQuery = useQuery({
-    queryKey: ['invoice', id],
+    queryKey: ["invoice", id],
     queryFn: () => getInvoiceByID(id),
     enabled: !!id,
   });
