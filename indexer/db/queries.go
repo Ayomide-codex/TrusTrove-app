@@ -34,6 +34,7 @@ type DbPoolStats struct {
 	UtilizationRateBps    int       `json:"utilization_rate_bps"`
 	TotalYieldDistributed string    `json:"total_yield_distributed"`
 	ActiveInvoiceCount    int       `json:"active_invoice_count"`
+	TotalShares           string    `json:"total_shares"`
 	UpdatedAt             time.Time `json:"updated_at"`
 }
 
@@ -255,7 +256,7 @@ func UpdateInvoiceStatus(ctx context.Context, id string, status string) error {
 
 func GetPoolStats(ctx context.Context) (*DbPoolStats, error) {
 	query := `
-		SELECT total_deposits, total_funded, available_liquidity, utilization_rate_bps, total_yield_distributed, active_invoice_count, updated_at
+		SELECT total_deposits, total_funded, available_liquidity, utilization_rate_bps, total_yield_distributed, active_invoice_count, total_shares, updated_at
 		FROM pool_snapshots
 		WHERE id = 1
 	`
@@ -264,7 +265,7 @@ func GetPoolStats(ctx context.Context) (*DbPoolStats, error) {
 	err := row.Scan(
 		&stats.TotalDeposits, &stats.TotalFunded, &stats.AvailableLiquidity,
 		&stats.UtilizationRateBps, &stats.TotalYieldDistributed, &stats.ActiveInvoiceCount,
-		&stats.UpdatedAt,
+		&stats.TotalShares, &stats.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -284,6 +285,7 @@ func UpdatePoolStats(ctx context.Context, stats *DbPoolStats) error {
 		    utilization_rate_bps = @utilization_rate_bps,
 		    total_yield_distributed = @total_yield_distributed,
 		    active_invoice_count = @active_invoice_count,
+		    total_shares = @total_shares,
 		    updated_at = CURRENT_TIMESTAMP
 		WHERE id = 1
 	`
@@ -294,6 +296,7 @@ func UpdatePoolStats(ctx context.Context, stats *DbPoolStats) error {
 		"utilization_rate_bps":      stats.UtilizationRateBps,
 		"total_yield_distributed":   stats.TotalYieldDistributed,
 		"active_invoice_count":      stats.ActiveInvoiceCount,
+		"total_shares":              stats.TotalShares,
 	}
 	_, err := Pool.Exec(ctx, query, args)
 	if err != nil {
@@ -328,6 +331,41 @@ func IsEventProcessed(ctx context.Context, eventID string) (bool, error) {
 		return false, fmt.Errorf("queries: is event processed: %w", err)
 	}
 	return exists, nil
+}
+
+type EventLog struct {
+	ID             int             `json:"id"`
+	EventID        string          `json:"event_id"`
+	ContractID     string          `json:"contract_id"`
+	Ledger         int32           `json:"ledger"`
+	LedgerClosedAt int64           `json:"ledger_closed_at"`
+	EventType      string          `json:"event_type"`
+	Data           json.RawMessage `json:"data"`
+}
+
+func GetRecentEvents(ctx context.Context, limit int) ([]*EventLog, error) {
+	query := `
+		SELECT id, event_id, contract_id, ledger, ledger_closed_at, event_type, data
+		FROM events_log
+		ORDER BY ledger_closed_at DESC
+		LIMIT $1
+	`
+	rows, err := Pool.Query(ctx, query, limit)
+	if err != nil {
+		return nil, fmt.Errorf("queries: get recent events: %w", err)
+	}
+	defer rows.Close()
+
+	var events []*EventLog
+	for rows.Next() {
+		var ev EventLog
+		err := rows.Scan(&ev.ID, &ev.EventID, &ev.ContractID, &ev.Ledger, &ev.LedgerClosedAt, &ev.EventType, &ev.Data)
+		if err != nil {
+			return nil, fmt.Errorf("queries: scan event: %w", err)
+		}
+		events = append(events, &ev)
+	}
+	return events, nil
 }
 
 func GetLatestProcessedLedger(ctx context.Context) (int32, error) {

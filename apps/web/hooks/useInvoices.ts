@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getInvoices, getInvoiceByID, createInvoice, PaginatedInvoices } from '@/lib/api';
 import { InvoiceClient, PoolClient } from '@trusttrove/sdk';
 import { useWalletStore } from '@/store/wallet';
+import { showSuccessToast, showErrorToast } from '@/lib/toast';
 
 const invoiceContractID = process.env.NEXT_PUBLIC_INVOICE_CONTRACT_ID || '';
 const poolContractID = process.env.NEXT_PUBLIC_POOL_CONTRACT_ID || '';
@@ -62,6 +63,10 @@ export function useInvoices(filters?: { status?: string; issuer?: string; page?:
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      showSuccessToast('Invoice Created');
+    },
+    onError: (error) => {
+      showErrorToast('Invoice Creation Failed', error instanceof Error ? error : undefined);
     },
   });
 
@@ -73,6 +78,10 @@ export function useInvoices(filters?: { status?: string; issuer?: string; page?:
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      showSuccessToast('Invoice Listed for Financing');
+    },
+    onError: (error) => {
+      showErrorToast('Listing Failed', error instanceof Error ? error : undefined);
     },
   });
 
@@ -86,6 +95,10 @@ export function useInvoices(filters?: { status?: string; issuer?: string; page?:
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       queryClient.invalidateQueries({ queryKey: ['poolStats'] });
       queryClient.invalidateQueries({ queryKey: ['lpPosition', address] });
+      showSuccessToast('Invoice Funded');
+    },
+    onError: (error) => {
+      showErrorToast('Funding Failed', error instanceof Error ? error : undefined);
     },
   });
 
@@ -97,6 +110,10 @@ export function useInvoices(filters?: { status?: string; issuer?: string; page?:
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      showSuccessToast('Invoice Shipped');
+    },
+    onError: (error) => {
+      showErrorToast('Shipping Failed', error instanceof Error ? error : undefined);
     },
   });
 
@@ -108,6 +125,10 @@ export function useInvoices(filters?: { status?: string; issuer?: string; page?:
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      showSuccessToast('Delivery Confirmed');
+    },
+    onError: (error) => {
+      showErrorToast('Confirmation Failed', error instanceof Error ? error : undefined);
     },
   });
 
@@ -121,6 +142,10 @@ export function useInvoices(filters?: { status?: string; issuer?: string; page?:
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       queryClient.invalidateQueries({ queryKey: ['poolStats'] });
       queryClient.invalidateQueries({ queryKey: ['lpPosition', address] });
+      showSuccessToast('Invoice Repaid');
+    },
+    onError: (error) => {
+      showErrorToast('Repayment Failed', error instanceof Error ? error : undefined);
     },
   });
 
@@ -134,6 +159,10 @@ export function useInvoices(filters?: { status?: string; issuer?: string; page?:
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       queryClient.invalidateQueries({ queryKey: ['poolStats'] });
       queryClient.invalidateQueries({ queryKey: ['lpPosition', address] });
+      showSuccessToast('Invoice Defaulted');
+    },
+    onError: (error) => {
+      showErrorToast('Default Action Failed', error instanceof Error ? error : undefined);
     },
   });
 
