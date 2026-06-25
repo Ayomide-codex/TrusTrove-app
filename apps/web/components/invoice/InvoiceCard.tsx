@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { Calendar, ShieldAlert, Copy, Check, Truck, Landmark, Wallet, CheckSquare, Clock, X } from 'lucide-react';
 import { formatAmount } from '@/lib/assets';
 
+
 interface InvoiceCardProps {
   invoice: Invoice;
   role?: 'issuer' | 'buyer' | 'lp';
