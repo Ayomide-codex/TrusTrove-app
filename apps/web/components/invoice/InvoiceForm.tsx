@@ -9,10 +9,14 @@ import { ASSET_OPTIONS } from '@/lib/assets';
 import { AmountInput } from '@/components/shared/AmountInput';
 import { useWalletStore } from '@/store/wallet';
 import { InvoiceClient } from '@trusttrove/sdk';
-import { xdr, nativeToScVal } from '@stellar/stellar-sdk';
+import { xdr, nativeToScVal, StrKey } from '@stellar/stellar-sdk';
 import { SimulationPreview } from '@/components/shared/SimulationPreview';
 
 const invoiceContractID = process.env.NEXT_PUBLIC_INVOICE_CONTRACT_ID || '';
+
+/** Zero-byte placeholder invoice ID for fee estimation simulation only */
+const SIMULATION_PLACEHOLDER_INVOICE_ID =
+  '0000000000000000000000000000000000000000000000000000000000000000';
 
 
 interface InvoiceFormProps {
@@ -37,6 +41,14 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
   const [simError, setSimError] = useState<string | null>(null);
   const [isSimulating, setIsSimulating] = useState(false);
   const [isFallback, setIsFallback] = useState(false);
+  const [simulationDiscountBps, setSimulationDiscountBps] = useState(discountBps);
+
+  // Debounce discount changes so simulation only runs after slider settles on step 2
+  useEffect(() => {
+    if (step !== 2) return;
+    const timer = setTimeout(() => setSimulationDiscountBps(discountBps), 500);
+    return () => clearTimeout(timer);
+  }, [step, discountBps]);
 
   useEffect(() => {
     if (step !== 2 || !address) return;
@@ -50,25 +62,9 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
 
       try {
         const invoiceClient = new InvoiceClient(invoiceContractID);
-        let invoiceIdToSimulate = '';
-
-        try {
-          const { getInvoices } = await import('@/lib/api');
-          const myInvoices = await getInvoices({ issuer: address });
-          if (myInvoices && myInvoices.data.length > 0) {
-            invoiceIdToSimulate = myInvoices.data[0].id;
-          }
-        } catch (e) {
-          console.warn('Failed to fetch existing invoices for simulation:', e);
-        }
-
-        if (!invoiceIdToSimulate) {
-          invoiceIdToSimulate = '0000000000000000000000000000000000000000000000000000000000000000';
-        }
-
         const args = [
-          xdr.ScVal.scvBytes(Buffer.from(invoiceIdToSimulate, 'hex')),
-          nativeToScVal(discountBps, { type: 'u32' }),
+          xdr.ScVal.scvBytes(Buffer.from(SIMULATION_PLACEHOLDER_INVOICE_ID, 'hex')),
+          nativeToScVal(simulationDiscountBps, { type: 'u32' }),
         ];
 
         const simResult = await invoiceClient.simulateTransaction('list_for_financing', args, address);
@@ -85,12 +81,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
           errMsg.includes('missing')
         ) {
           setIsFallback(true);
-          setSimDetails({
-            estimatedFeeXlm: '0.0051185',
-            functionName: 'list_for_financing',
-            expectedResult: null,
-            footprintSize: 4,
-          });
+          setSimDetails(null);
         } else {
           setSimError(errMsg);
         }
@@ -99,11 +90,15 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
       }
     };
 
-    runSim();
+    const timerId = setTimeout(() => {
+      runSim();
+    }, 300);
+
     return () => {
       active = false;
+      clearTimeout(timerId);
     };
-  }, [step, address, discountBps]);
+  }, [step, address, simulationDiscountBps]);
 
   const parsedValue = parseFloat(faceValue.replace(/,/g, '')) || 0;
   
@@ -115,10 +110,12 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
     e.preventDefault();
     setError(null);
 
-    if (!buyer || buyer.length !== 56 || !buyer.startsWith('G')) {
-      setError('Buyer must be a valid Stellar public key (56 characters, starting with G)');
+    const trimmedBuyer = buyer.trim();
+    if (!trimmedBuyer || !StrKey.isValidEd25519PublicKey(trimmedBuyer)) {
+      setError('Buyer must be a valid Stellar public key (G... account address)');
       return;
     }
+    if (trimmedBuyer !== buyer) setBuyer(trimmedBuyer);
 
     if (parsedValue <= 0) {
       setError('Face value must be a positive number');
@@ -148,10 +145,17 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
         asset,
       });
 
+      if (!res.invoice_id) {
+        throw new Error('Invoice creation did not return a valid invoice ID');
+      }
+      if (!res.transaction_hash) {
+        throw new Error('Invoice creation did not return a transaction hash');
+      }
+
       const invoiceId = res.invoice_id;
 
       // Transaction 2: Immediate List
-      if (immediateList && invoiceId) {
+      if (immediateList) {
         setIsListing(true);
         // Pre-simulate list_for_financing on the newly created invoice ID before Freighter opens
         try {
