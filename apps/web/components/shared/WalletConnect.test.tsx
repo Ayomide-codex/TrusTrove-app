@@ -5,7 +5,7 @@ import { WalletConnect } from './WalletConnect';
 import { useWallet } from '@/hooks/useWallet';
 
 vi.mock('@/hooks/useWallet', () => {
-  let state = 'disconnected';
+  const state = 'disconnected';
   return {
     useWallet: vi.fn(() => ({
       connected: state === 'connected',
