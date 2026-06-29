@@ -129,6 +129,7 @@ export function DiscountCalculator() {
                   </span>
                 </div>
                 <input
+                  id="discount-sme-face-value"
                   type="range"
                   min="1000"
                   max="500000"
@@ -136,6 +137,10 @@ export function DiscountCalculator() {
                   value={faceValue}
                   onChange={(e) => setFaceValue(parseInt(e.target.value))}
                   className="w-full accent-primary bg-slate-900 h-1.5 rounded"
+                  aria-label="Invoice Face Value"
+                  aria-valuenow={faceValue}
+                  aria-valuemin={1000}
+                  aria-valuemax={500000}
                 />
                 <div className="flex justify-between text-[10px] text-slate-600 font-mono">
                   <span>$1K USDC</span>
@@ -171,6 +176,7 @@ export function DiscountCalculator() {
                   </span>
                 </div>
                 <input
+                  id="discount-sme-discount-rate"
                   type="range"
                   min="0.5"
                   max="5.0"
@@ -178,6 +184,10 @@ export function DiscountCalculator() {
                   value={discountRate}
                   onChange={(e) => setDiscountRate(parseFloat(e.target.value))}
                   className="w-full accent-primary bg-slate-900 h-1.5 rounded"
+                  aria-label="Financing Discount Rate"
+                  aria-valuenow={discountRate}
+                  aria-valuemin={0.5}
+                  aria-valuemax={5.0}
                 />
                 <div className="flex justify-between text-[10px] text-slate-600 font-mono">
                   <span>0.5% (50 bps)</span>
@@ -310,6 +320,7 @@ export function DiscountCalculator() {
                   </span>
                 </div>
                 <input
+                  id="discount-lp-deposit"
                   type="range"
                   min="500"
                   max="100000"
@@ -317,6 +328,10 @@ export function DiscountCalculator() {
                   value={lpDeposit}
                   onChange={(e) => setLpDeposit(parseInt(e.target.value))}
                   className="w-full accent-primary bg-slate-900 h-1.5 rounded"
+                  aria-label="Total USDC Deposit"
+                  aria-valuenow={lpDeposit}
+                  aria-valuemin={500}
+                  aria-valuemax={100000}
                 />
                 <div className="flex justify-between text-[10px] text-slate-600 font-mono">
                   <span>$500 USDC</span>
@@ -335,6 +350,7 @@ export function DiscountCalculator() {
                   </span>
                 </div>
                 <input
+                  id="discount-lp-utilization"
                   type="range"
                   min="10"
                   max="100"
@@ -342,6 +358,10 @@ export function DiscountCalculator() {
                   value={lpUtilization}
                   onChange={(e) => setLpUtilization(parseInt(e.target.value))}
                   className="w-full accent-primary bg-slate-900 h-1.5 rounded"
+                  aria-label="Target Pool Utilization"
+                  aria-valuenow={lpUtilization}
+                  aria-valuemin={10}
+                  aria-valuemax={100}
                 />
                 <div className="flex justify-between text-[10px] text-slate-600 font-mono">
                   <span>10% (Low)</span>
@@ -361,6 +381,7 @@ export function DiscountCalculator() {
                   </span>
                 </div>
                 <input
+                  id="discount-lp-avg-discount"
                   type="range"
                   min="0.5"
                   max="5.0"
@@ -368,6 +389,10 @@ export function DiscountCalculator() {
                   value={lpAvgDiscount}
                   onChange={(e) => setLpAvgDiscount(parseFloat(e.target.value))}
                   className="w-full accent-primary bg-slate-900 h-1.5 rounded"
+                  aria-label="Avg Invoice Discount Bps"
+                  aria-valuenow={lpAvgDiscount}
+                  aria-valuemin={0.5}
+                  aria-valuemax={5.0}
                 />
                 <div className="flex justify-between text-[10px] text-slate-600 font-mono">
                   <span>0.5%</span>
@@ -384,6 +409,7 @@ export function DiscountCalculator() {
                   </span>
                 </div>
                 <input
+                  id="discount-lp-avg-maturity"
                   type="range"
                   min="15"
                   max="90"
@@ -391,6 +417,10 @@ export function DiscountCalculator() {
                   value={lpAvgMaturity}
                   onChange={(e) => setLpAvgMaturity(parseInt(e.target.value))}
                   className="w-full accent-primary bg-slate-900 h-1.5 rounded"
+                  aria-label="Avg Days to Maturity"
+                  aria-valuenow={lpAvgMaturity}
+                  aria-valuemin={15}
+                  aria-valuemax={90}
                 />
                 <div className="flex justify-between text-[10px] text-slate-600 font-mono">
                   <span>15 Days</span>
