@@ -1,4 +1,4 @@
-import { test as base } from '@playwright/test';
+import { test as base } from "@playwright/test";
 
 // Extend basic test by providing a mocked freighter window object
 export const test = base.extend({
@@ -8,11 +8,14 @@ export const test = base.extend({
         isConnected: () => Promise.resolve(true),
         isAllowed: () => Promise.resolve(true),
         setAllowed: () => Promise.resolve(),
-        requestAccess: () => Promise.resolve(''),
-        signTransaction: (xdr: string) => Promise.resolve('signed-xdr-mock'),
-        signAuthEntry: () => Promise.resolve('signed-auth-mock'),
-        getPublicKey: () => Promise.resolve('GBMOCKWALLETADDRESSXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'),
-        getNetworkDetails: () => Promise.resolve({ network: 'TESTNET' })
+        requestAccess: () => Promise.resolve(""),
+        signTransaction: (xdr: string) => Promise.resolve("signed-xdr-mock"),
+        signAuthEntry: () => Promise.resolve("signed-auth-mock"),
+        getPublicKey: () =>
+          Promise.resolve(
+            "GBMOCKWALLETADDRESSXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          ),
+        getNetworkDetails: () => Promise.resolve({ network: "TESTNET" }),
       };
     });
     await use(page);

@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { X, ShieldAlert } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useConfirmDialogStore } from '@/store/confirmDialog';
+import React from "react";
+import { X, ShieldAlert } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useConfirmDialogStore } from "@/store/confirmDialog";
 
 function truncateAddr(addr: string) {
-  if (!addr) return '';
+  if (!addr) return "";
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
@@ -61,7 +61,8 @@ export function ConfirmationDialog() {
         </div>
 
         <p className="text-[10px] text-amber-500/90 font-mono mb-4 leading-normal">
-          This action is irreversible once submitted on-chain. Review carefully before confirming.
+          This action is irreversible once submitted on-chain. Review carefully
+          before confirming.
         </p>
 
         <div className="flex gap-2">
